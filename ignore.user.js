@@ -37,6 +37,8 @@
 	function procDiscuss() {
 		$("#app-body-new > div.am-g.lg-main-content > div.am-u-md-8.lg-right > div > p").remove(); // 把上一次屏蔽的提示信息删除
 		$("#app-body-new > div.am-g.lg-main-content > div.am-u-md-8.lg-right > div > article").show(); // 把上一次屏蔽的评论解除隐藏
+		var lz = $("#app-body-new > div.am-g.lg-main-content > div.am-u-md-4.lg-right > section > div > ul > li:nth-child(2) > span > a");
+		lz.parent().show();
 		var comments = $("#app-body-new > div.am-g.lg-main-content > div.am-u-md-8.lg-right > div > article"); // 该页面的所有评论
 		for (var i = 0; i < comments.length; i++) {
 			(function (comment) {
@@ -53,7 +55,6 @@
 				}
 			})(comments[i]);
 		}
-		var lz = $("#app-body-new > div.am-g.lg-main-content > div.am-u-md-4.lg-right > section > div > ul > li:nth-child(2) > span > a");
 		if (ignoreList[lz[0].innerText] == true && ignoreEntirely) { // 如果需要彻底屏蔽，那么删除楼主
 			lz.parent().hide();
 		}
@@ -84,12 +85,12 @@
 	}
 	function ignAll() {
 		ignoreEntirely = true;
-		GM.setValue('LuoguIgnoreEntirely', ignoreList);
+		GM.setValue('LuoguIgnoreEntirely', ignoreEntirely);
 		process();
 	}
 	function ignPart() {
 		ignoreEntirely = false;
-		GM.setValue('LuoguIgnoreEntirely', ignoreList);
+		GM.setValue('LuoguIgnoreEntirely', ignoreEntirely);
 		process();
 	}
 	unsafeWindow.ignAdd = ignAdd;
