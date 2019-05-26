@@ -55,7 +55,7 @@
 		}
 		var lz = $("#app-body-new > div.am-g.lg-main-content > div.am-u-md-4.lg-right > section > div > ul > li:nth-child(2) > span > a");
 		if (ignoreList[lz[0].innerText] == true && ignoreEntirely) { // 如果需要彻底屏蔽，那么删除楼主
-			lz.hide();
+			lz.parent().hide();
 		}
 	}
 
