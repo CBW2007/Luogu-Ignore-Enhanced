@@ -17,7 +17,11 @@
 - 比赛排行榜、出题人
 - 博客及其评论
 
-## 使用方法
+## 使用方式
+
+安装：[这里](https://github.com/tiger0132/Luogu-Ignore-Enhanced/raw/master/ignore.user.js)。
+
+默认的屏蔽列表是空的，在 Console 中使用下列函数修改屏蔽列表：
 
 函数名称 | 用途
 :-: | :-:
