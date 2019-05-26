@@ -15,6 +15,7 @@
 // @match        https://*.blog.luogu.org*
 // @grant        GM.setValue
 // @grant        GM.getValue
+// @grant        GM_addStyle
 // @grant        unsafeWindow
 // ==/UserScript==
 
@@ -34,7 +35,7 @@
 	var ignoreList = await GM.getValue('LuoguIgnoreList', {});
 	var ignoreEntirely = await GM.getValue('LuoguIgnoreEntirely', false);
 
-	function procDiscuss() {
+	function procDiscuss() { // 安排讨论页面
 		$("#app-body-new > div.am-g.lg-main-content > div.am-u-md-8.lg-right > div > p").remove(); // 把上一次屏蔽的提示信息删除
 		$("#app-body-new > div.am-g.lg-main-content > div.am-u-md-8.lg-right > div > article").show(); // 把上一次屏蔽的评论解除隐藏
 		var lz = $("#app-body-new > div.am-g.lg-main-content > div.am-u-md-4.lg-right > section > div > ul > li:nth-child(2) > span > a");
@@ -59,23 +60,92 @@
 			lz.parent().hide();
 		}
 	}
-
-	process();
-	function process() {
+	function idSelector() { // ID 选择器
+		// TODO: 在博客、题解评论中选择 ID
+		GM_addStyle(`
+a.lg-fg-brown:hover, a.lg-fg-gray:hover, a.lg-fg-bluelight:hover, a.lg-fg-green:hover, a.lg-fg-orange:hover, a.lg-fg-red:hover, a.lg-fg-purple:hover {
+    background-color: lightgreen;
+    color: #fff;
+    text-decoration: none;
+}
+* {
+	margin: 0;
+	padding: 0;
+}
+.menu {
+	width: 72px;
+	border: 1px solid #ccc;
+	position: absolute;
+	box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+	background: white;
+	padding: 0 0;
+	transition: all .1s ease;
+}
+.menu li {
+	list-style: none;
+	width: 100%;
+}
+.menu li a {
+	display: inline-block;
+	text-decoration: none;
+	color: #555;
+	width: 100%;
+	padding: 4px 0;
+	text-align: center;
+	font-size: 10px;
+}
+.menu li:first-of-type {
+	border-radius: 5px 5px 0 0;
+}
+.menu li a:hover,
+.menu li a:active {
+	background: #eee;
+	color: #0AAF88;
+}`); // 鼠标移动到 ID 上就有绿框框~
+		$(document.body).append(`<ul class="menu" id="menu"><li><a>屏蔽</a></li><li><a>解除</a></li></ul>`);
+		var id = $("a.lg-fg-brown, a.lg-fg-gray, a.lg-fg-bluelight, a.lg-fg-green, a.lg-fg-orange, a.lg-fg-red, a.lg-fg-purple");
+		var w = function () { return document.documentElement.clientWidth || document.body.clientWidth; };
+		var h = function () { return document.documentElement.clientHeight || document.body.clientHeight; };
+		var menu = $('#menu');
+		menu.hide();
+		id.onclick = function () { menu.hide(); };
+		menu.onclick = function (e) {
+			var event = e || window.event;
+			event.cancelBubble = true;
+		};
+		for (var i = 0; i < id.length; i++) {
+			id[i].oncontextmenu = function (e) {
+				document.getElementById("menu").style.display = "block";
+				var event = event || e;
+				var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+				document.getElementById("menu").style.top = event.clientY + scrollTop + "px";
+				var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
+				document.getElementById("menu").style.left = event.clientX + scrollLeft + "px";
+				return false;
+			}
+		}
+		document.onclick = function () {
+			document.getElementById("menu").style.display = "none";
+		}
+	}
+	function proc() {
 		if (window.location.href.match(/discuss/) != null) { // 讨论页面
 			procDiscuss();
 		}
 	}
 
+	proc();
+	idSelector();
+
 	function ignAdd(id) {
 		ignoreList[id] = true;
 		GM.setValue('LuoguIgnoreList', ignoreList);
-		process();
+		proc();
 	}
 	function ignDel(id) {
 		delete ignoreList[id];
 		GM.setValue('LuoguIgnoreList', ignoreList);
-		process();
+		proc();
 	}
 	function ignQuery(id) {
 		return ignoreList[id];
@@ -86,12 +156,12 @@
 	function ignAll() {
 		ignoreEntirely = true;
 		GM.setValue('LuoguIgnoreEntirely', ignoreEntirely);
-		process();
+		proc();
 	}
 	function ignPart() {
 		ignoreEntirely = false;
 		GM.setValue('LuoguIgnoreEntirely', ignoreEntirely);
-		process();
+		proc();
 	}
 	unsafeWindow.ignAdd = ignAdd;
 	unsafeWindow.ignDel = ignDel;
