@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Luogu Ignore Enhanced - tiger0132
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  nope
 // @author       tiger0132
 // @match        https://www.luogu.org/
