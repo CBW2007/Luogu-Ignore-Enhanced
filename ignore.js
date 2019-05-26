@@ -38,20 +38,22 @@
 		$("#app-body-new > div.am-g.lg-main-content > div.am-u-md-8.lg-right > div > p").remove();
 		var comments = $("#app-body-new > div.am-g.lg-main-content > div.am-u-md-8.lg-right > div > article");
 		for (var i = 0; i < comments.length; i++) {
-			var id = $(".am-comment-meta > a:nth-child(2)", comments[i])[0].innerText;
-			if (ignoreList[id] == true) { // 发现了小学生
-				if (ignoreEntirely) {
-					$(comments[i]).remove();
+			(function (comment) {
+				var id = $(".am-comment-meta > a:nth-child(2)", comment)[0].innerText;
+				if (ignoreList[id] == true) { // 发现了小学生
+					if (ignoreEntirely) {
+						$(comment).remove();
+					}
+					else {
+						var str = `屏蔽了来自 ${id} 的一条消息`;
+						if (comments[i].classList.contains("am-comment-danger")) str += ' (主楼)'; // 如果屏蔽了主楼则标记
+						var node = $(`<p style="color: gray;font-size: 14px;text-align: center;">${str}</p>`);
+						node.click(function () { node.prev().toggle(); });
+						node.insertAfter(comment);
+						$(comment).hide();
+					}
 				}
-				else {
-					var str = `屏蔽了来自 ${id} 的一条消息`;
-					if (comments[i].classList.contains("am-comment-danger")) str += ' (主楼)'; // 如果屏蔽了主楼则标记
-					var node = $(`<p style="color: gray;font-size: 14px;text-align: center;">${str}</p>`);
-					node.click(function () { node.prev().show(); });
-					node.insertAfter(comments[i]);
-					$(comments[i]).hide();
-				}
-			}
+			})(comments[i]);
 		}
 	}
 
