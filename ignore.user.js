@@ -123,7 +123,7 @@ a.lg-fg-brown:hover, a.lg-fg-gray:hover, a.lg-fg-bluelight:hover, a.lg-fg-green:
 					var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
 					menu[0].style.left = event.clientX + scrollLeft + "px";
 					menu[0].children[0].onclick = function () { ignTog(uid); }
-					menu[0].children[1].onclick = function () { ignDel(uid); }
+					menu[0].children[1].onclick = function () { window.open(`https://www.luogu.org/space/show?uid=${uid}`); }
 					return false;
 				}
 			})(getUid(ids[i]));
