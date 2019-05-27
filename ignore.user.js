@@ -60,7 +60,7 @@
 			lz.parent().hide();
 		}
 	}
-	function idSelector() { // ID 选择器
+	function selectorInit() { // ID 选择器初始化
 		// TODO: 在博客、题解评论中选择 ID
 		GM_addStyle(`
 a.lg-fg-brown:hover, a.lg-fg-gray:hover, a.lg-fg-bluelight:hover, a.lg-fg-green:hover, a.lg-fg-orange:hover, a.lg-fg-red:hover, a.lg-fg-purple:hover {
@@ -103,30 +103,39 @@ a.lg-fg-brown:hover, a.lg-fg-gray:hover, a.lg-fg-bluelight:hover, a.lg-fg-green:
 	color: #0AAF88;
 }`); // 鼠标移动到 ID 上就有绿框框~
 		$(document.body).append(`<ul class="menu" id="menu"><li><a>屏蔽</a></li><li><a>解除</a></li></ul>`);
-		var id = $("a.lg-fg-brown, a.lg-fg-gray, a.lg-fg-bluelight, a.lg-fg-green, a.lg-fg-orange, a.lg-fg-red, a.lg-fg-purple");
+	}
+	function idSelector() { // ID 选择器
+		var ids = $("a.lg-fg-brown, a.lg-fg-gray, a.lg-fg-bluelight, a.lg-fg-green, a.lg-fg-orange, a.lg-fg-red, a.lg-fg-purple");
 		var w = function () { return document.documentElement.clientWidth || document.body.clientWidth; };
 		var h = function () { return document.documentElement.clientHeight || document.body.clientHeight; };
 		var menu = $('#menu');
 		menu.hide();
-		id.onclick = function () { menu.hide(); };
 		menu.onclick = function (e) {
 			var event = e || window.event;
 			event.cancelBubble = true;
 		};
-		for (var i = 0; i < id.length; i++) {
-			id[i].oncontextmenu = function (e) {
-				document.getElementById("menu").style.display = "block";
-				var event = event || e;
-				var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-				document.getElementById("menu").style.top = event.clientY + scrollTop + "px";
-				var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
-				document.getElementById("menu").style.left = event.clientX + scrollLeft + "px";
-				return false;
-			}
+		for (var i = 0; i < ids.length; i++) {
+			(function (id) {
+				ids[i].onclick = function () { menu.hide(); };
+				ids[i].oncontextmenu = function (e) {
+					menu.show();
+					var event = event || e;
+					var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+					menu[0].style.top = event.clientY + scrollTop + "px";
+					var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
+					menu[0].style.left = event.clientX + scrollLeft + "px";
+					menu[0].children[0].onclick = function () { ignAdd(id); }
+					menu[0].children[1].onclick = function () { ignDel(id); }
+					return false;
+				}
+			})(ids[i].innerText);
 		}
 		document.onclick = function () {
 			document.getElementById("menu").style.display = "none";
 		}
+	}
+	function injectLoadFeed() {
+		new MutationObserver(function (mutations) { idSelector(); }).observe(document.getElementById('feed'), { childList: true, subtree: true });
 	}
 	function proc() {
 		if (window.location.href.match(/discuss/) != null) { // 讨论页面
@@ -134,8 +143,12 @@ a.lg-fg-brown:hover, a.lg-fg-gray:hover, a.lg-fg-bluelight:hover, a.lg-fg-green:
 		}
 	}
 
+	selectorInit();
+	setTimeout(function () {
+		idSelector();
+		injectLoadFeed();
+	}, 1000);
 	proc();
-	idSelector();
 
 	function ignAdd(id) {
 		ignoreList[id] = true;
