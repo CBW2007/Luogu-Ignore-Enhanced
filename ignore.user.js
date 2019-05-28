@@ -37,8 +37,10 @@
 		return node.href.match(/uid=(\d+)/)[1];
 	}
 	function procDiscuss() { // 安排讨论页面
+		console.log("procDiscuss() is working!");
 		$("#app-body-new > div.am-g.lg-main-content > div.am-u-md-8.lg-right > div > p").remove(); // 把上一次屏蔽的提示信息删除
 		$("#app-body-new > div.am-g.lg-main-content > div.am-u-md-8.lg-right > div > article").show(); // 把上一次屏蔽的评论解除隐藏
+		$("#app-body-new > div.am-g.lg-main-content > div.am-u-md-8.lg-right > div > article > div.am-comment-main > header > div > span.am-btn").remove(); // 把上一次在犇犇上放的按钮删除
 		var lz = $("#app-body-new > div.am-g.lg-main-content > div.am-u-md-4.lg-right > section > div > ul > li:nth-child(2) > span > a");
 		lz.parent().show();
 		var comments = $("#app-body-new > div.am-g.lg-main-content > div.am-u-md-8.lg-right > div > article"); // 该页面的所有评论
@@ -46,21 +48,66 @@
 			(function (comment) {
 				var id = $(".am-comment-meta > a:nth-child(2)", comment)[0].innerText;
 				var uid = getUid($(".am-comment-meta > a:nth-child(2)", comment)[0]);
+				var ignAddButton = $(`<span class="am-btn am-btn-danger am-btn-sm am-radius am-badge lg-bg-red">屏蔽</span>`);
+				var ignDelButton = $(`<span class="am-btn am-btn-success am-btn-sm am-radius am-badge lg-bg-green">解除</span>`);
+				ignAddButton.click(function () { ignAdd(uid); });
+				ignDelButton.click(function () { ignDel(uid); });
+				$("div.am-comment-main > header > div", comment).append(ignAddButton[0]).append(ignDelButton[0]);
 				if (ignQuery(uid) == true) { // 发现了小学生
+					ignAddButton.hide();
 					if (!ignoreEntirely) {
 						var str = `屏蔽了来自 ${id} 的一条消息`;
 						if (comments[i].classList.contains("am-comment-danger")) str += ' (主楼)'; // 如果屏蔽了主楼则标记
 						var node = $(`<p style="color: gray;font-size: 14px;text-align: center;">${str}</p>`);
-						node.click(function () { node.prev().toggle(); }); // 点击提示信息可以显示该条信息，再次点击可以重新屏蔽
-						node.insertAfter(comment);
+						node.click(function () {
+							node.toggle();
+							node.next().toggle();
+						}); // 点击提示信息可以显示该条信息，再次点击可以重新屏蔽
+						node.insertBefore(comment);
 					}
 					$(comment).hide();
+				} else {
+					ignDelButton.hide();
 				}
 			})(comments[i]);
 		}
 		if (ignQuery(getUid(lz[0])) == true && ignoreEntirely) { // 如果需要彻底屏蔽，那么删除楼主
 			lz.parent().hide();
 		}
+	}
+	function procFeed(obs) { // 安排犇犇
+		console.log("procFeed() is working!");
+		obs.disconnect();
+		$("#feed > p").remove(); // 把上一次屏蔽的提示信息删除
+		$("#feed > li").show(); // 把上一次屏蔽的犇犇解除隐藏
+		$("#feed > li > div.am-comment-main > header > div > span.am-btn").remove(); // 把上一次在犇犇上放的按钮删除
+		var comments = $("#feed > li");
+		for (var i = 0; i < comments.length; i++) {
+			(function (comment) {
+				var id = $("div.am-comment-main > header > div > span > a", comment)[0].innerText;
+				var uid = getUid($("div.am-comment-main > header > div > span > a", comment)[0]);
+				var ignAddButton = $(`<span class="am-btn am-btn-danger am-btn-sm am-radius am-badge lg-bg-red">屏蔽</span>`);
+				var ignDelButton = $(`<span class="am-btn am-btn-success am-btn-sm am-radius am-badge lg-bg-green">解除</span>`);
+				ignAddButton.click(function () { ignAdd(uid); });
+				ignDelButton.click(function () { ignDel(uid); });
+				$("div.am-comment-main > header > div", comment).append(ignAddButton[0]).append(ignDelButton[0]);
+				if (ignQuery(uid) == true) { // 发现了小学生
+					ignAddButton.hide();
+					if (!ignoreEntirely) {
+						var node = $(`<p style="color: gray;font-size: 14px;text-align: center;">屏蔽了来自 ${id} 的一条消息</p>`);
+						node.click(function () {
+							node.toggle();
+							node.next().toggle();
+						}); // 点击提示信息可以显示该条信息，再次点击可以重新屏蔽
+						node.insertBefore(comment);
+					}
+					$(comment).hide();
+				} else {
+					ignDelButton.hide();
+				}
+			})(comments[i]);
+		}
+		obs.observe(document.getElementById('feed'), { childList: true, subtree: true });
 	}
 	function selectorInit() { // ID 选择器初始化
 		// TODO: 在博客、题解评论中选择 ID
@@ -106,8 +153,8 @@ a.lg-fg-brown:hover, a.lg-fg-gray:hover, a.lg-fg-bluelight:hover, a.lg-fg-green:
 }`); // 鼠标移动到 ID 上就有绿框框~
 		$(document.body).append(`<ul class="menu" id="menu" style="display: none"><li><a>屏蔽</a></li><li><a>进入主页</a></li></ul>`);
 	}
-	function idSelector() { // ID 选择器
-		console.log("is working!");
+	function idSelector() { // ID 选择器菜单 (已过时，该菜单将会用于显示用户信息)
+        /*console.log("idSelector() is working!");
 		var ids = $("a.lg-fg-brown, a.lg-fg-gray, a.lg-fg-bluelight, a.lg-fg-green, a.lg-fg-orange, a.lg-fg-red, a.lg-fg-purple");
 		var menu = $('#menu');
 		menu.hide();
@@ -116,7 +163,6 @@ a.lg-fg-brown:hover, a.lg-fg-gray:hover, a.lg-fg-bluelight:hover, a.lg-fg-green:
 			event.cancelBubble = true;
 		};
 		for (var i = 0; i < ids.length; i++) {
-			console.log(getUid(ids[i]));
 			(function (uid) {
 				ids[i].onclick = function () { menu.hide(); };
 				ids[i].oncontextmenu = function (e) {
@@ -134,13 +180,22 @@ a.lg-fg-brown:hover, a.lg-fg-gray:hover, a.lg-fg-bluelight:hover, a.lg-fg-green:
 		}
 		document.onclick = function () {
 			menu.hide();
-		}
+		}*/
 	}
+	var injected = false, obs;
 	function injectLoadFeed() { // 安排犇犇
+		if (injected) {
+			procFeed(obs);
+			idSelector();
+			return;
+		}
 		try {
-			new MutationObserver(function (mutations) {
+			obs = new MutationObserver(function (mutations) { // 开选择器顺便安排了犇犇
+				procFeed(this);
 				idSelector();
-			}).observe(document.getElementById('feed'), { childList: true, subtree: true });
+			});
+			obs.observe(document.getElementById('feed'), { childList: true, subtree: true });
+			injected = true;
 		} catch (_) {
 		}
 	}
@@ -207,4 +262,5 @@ a.lg-fg-brown:hover, a.lg-fg-gray:hover, a.lg-fg-bluelight:hover, a.lg-fg-green:
 
 	unsafeWindow.dbg_idSelector = idSelector;
 	unsafeWindow.dbg_proc = proc;
+	unsafeWindow.dbg_ignoreEntirely = ignoreEntirely;
 })();
