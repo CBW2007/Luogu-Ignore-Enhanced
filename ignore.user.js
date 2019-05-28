@@ -8,6 +8,9 @@
 // @require      https://cdn.luogu.org/js/jquery-2.1.1.min.js
 // @grant        GM.setValue
 // @grant        GM.getValue
+// 下面这两个貌似已经过时了，但是为了能在权限列表里正确显示还是加上了
+// @grant        GM_setValue
+// @grant        GM_getValue
 // @grant        GM_addStyle
 // @grant        unsafeWindow
 // @run-at       document-idle
@@ -104,6 +107,7 @@ a.lg-fg-brown:hover, a.lg-fg-gray:hover, a.lg-fg-bluelight:hover, a.lg-fg-green:
 		$(document.body).append(`<ul class="menu" id="menu" style="display: none"><li><a>屏蔽</a></li><li><a>进入主页</a></li></ul>`);
 	}
 	function idSelector() { // ID 选择器
+		console.log("is working!");
 		var ids = $("a.lg-fg-brown, a.lg-fg-gray, a.lg-fg-bluelight, a.lg-fg-green, a.lg-fg-orange, a.lg-fg-red, a.lg-fg-purple");
 		var menu = $('#menu');
 		menu.hide();
@@ -142,8 +146,13 @@ a.lg-fg-brown:hover, a.lg-fg-gray:hover, a.lg-fg-bluelight:hover, a.lg-fg-green:
 	}
 	function proc() { // 主函数
 		if (window.location.href.match(/https:\/\/www\.luogu\.org\/discuss\/show\/\d+/) != null) { // 讨论页面
+			console.log("location: /discuss/show/*");
 			procDiscuss();
-		} else if (window.location.href.match(/https:\/\/www\.luogu\.org\/(#.+|\?.+)/)) { // 主站
+		} else if (window.location.href.match(/https:\/\/www\.luogu\.org\/space\/show\?uid=-?\d+/) != null) { // 用户主页
+			console.log("location: /space/show");
+			injectLoadFeed();
+		} else if (window.location.href.match(/https:\/\/www\.luogu\.org/) != null) { // 主站
+			console.log("location: /");
 			injectLoadFeed();
 			// TODO: 安排讨论列表
 		}
@@ -195,4 +204,7 @@ a.lg-fg-brown:hover, a.lg-fg-gray:hover, a.lg-fg-bluelight:hover, a.lg-fg-green:
 	unsafeWindow.ignClear = ignClear;
 	unsafeWindow.ignAll = ignAll;
 	unsafeWindow.ignPart = ignPart;
+
+	unsafeWindow.dbg_idSelector = idSelector;
+	unsafeWindow.dbg_proc = proc;
 })();
